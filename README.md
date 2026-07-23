@@ -1,6 +1,6 @@
 # WooCommerce Bulk Uploader
 
-A standalone desktop app to bulk-upload product images to WooCommerce. Separate from the main AI SEO Agent — designed to be shared with a colleague without giving access to the full SEO system.
+A standalone desktop app to bulk-upload product images to WooCommerce. Scan a local folder, auto-parse product names, SKUs, and prices from filenames, build categories from folder structure, and upload everything directly to your WooCommerce store — or export as a ready-to-import CSV.
 
 **Developed by:** Muhammad Imran · metaaffinity.net
 
