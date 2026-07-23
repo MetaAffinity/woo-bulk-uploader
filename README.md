@@ -2,7 +2,7 @@
 
 A standalone desktop app to bulk-upload product images to WooCommerce. Scan a local folder, auto-parse product names, SKUs, and prices from filenames, build categories from folder structure, and upload everything directly to your WooCommerce store — or export as a ready-to-import CSV.
 
-**Developed by:** Muhammad Imran · metaaffinity.net
+**Developed by:** Muhammad Imran · [metaaffinity.net](https://metaaffinity.net)
 
 ---
 
