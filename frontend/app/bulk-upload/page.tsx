@@ -100,6 +100,12 @@ export default function BulkUploadPage() {
   const [showCsvPanel, setShowCsvPanel] = useState(false);
   const [imgBaseUrl, setImgBaseUrl] = useState('');
   const [forceSku, setForceSku] = useState(false);
+  const [descMode, setDescMode] = useState<'global' | 'category'>('global');
+  const [globalDesc, setGlobalDesc] = useState('');
+  const [categoryDescs, setCategoryDescs] = useState<Record<string, string>>({});
+  const [showDescHelp, setShowDescHelp] = useState(false);
+  const [categoryNames, setCategoryNames] = useState<Record<string, string>>({});
+  const [showNameHelp, setShowNameHelp] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -175,7 +181,9 @@ export default function BulkUploadPage() {
     if (!sessionId) return;
     setError("");
     try {
-      await api.bulkStart(sessionId);
+      const catDesc = descMode === 'category' ? categoryDescs : {};
+      const globDesc = descMode === 'global' ? globalDesc : '';
+      await api.bulkStart(sessionId, globDesc, catDesc, categoryNames);
       setSession((prev) => (prev ? { ...prev, state: "running" } : prev));
       startPolling(sessionId);
     } catch (e: any) {
@@ -251,6 +259,23 @@ export default function BulkUploadPage() {
   const autoSkuEnabled = skuPrefix.trim().length > 0;
   const noSkuCount =
     session?.products.filter((p) => !p.sku && !p.sku_auto).length ?? 0;
+
+  // Extract unique category paths from scanned products
+  const categoryPaths = session ? Array.from(new Set(
+    session.products.flatMap(p => {
+      const paths: string[] = [];
+      if (p.category) {
+        paths.push(p.category);
+        if (p.subcategory) {
+          paths.push(`${p.category} > ${p.subcategory}`);
+          if (p.subsubcategory) {
+            paths.push(`${p.category} > ${p.subcategory} > ${p.subsubcategory}`);
+          }
+        }
+      }
+      return paths;
+    })
+  )).sort() : [];
 
   // Not configured yet
   if (configured === false) {
@@ -417,6 +442,184 @@ export default function BulkUploadPage() {
               <div className="flex items-start gap-2 p-2.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
                 <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                 {error}
+              </div>
+            )}
+
+            {/* Description section — shown after scan */}
+            {session?.state === "preview" && hasProducts && (
+              <div className="rounded-xl border border-[#2a2d3a] overflow-hidden">
+                <div className="px-3.5 py-2.5 bg-white/[0.02] border-b border-[#2a2d3a] flex items-center justify-between">
+                  <p className="text-xs font-semibold text-slate-300">Product Description</p>
+                  <div className="flex items-center gap-1">
+                    {(['global', 'category'] as const).map(mode => (
+                      <button
+                        key={mode}
+                        onClick={() => setDescMode(mode)}
+                        className={`px-2.5 py-1 text-[11px] rounded font-medium transition-colors ${
+                          descMode === mode
+                            ? 'bg-blue-600 text-white'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        {mode === 'global' ? 'Global' : 'By Category'}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => setShowDescHelp(true)}
+                      className="w-5 h-5 rounded-full border border-slate-600 text-slate-500 hover:text-white hover:border-slate-400 text-[11px] font-bold transition-colors flex items-center justify-center ml-1"
+                      title="How does this work?"
+                    >
+                      ?
+                    </button>
+                  </div>
+                </div>
+
+                {/* Help popup */}
+                {showDescHelp && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowDescHelp(false)}>
+                    <div className="relative w-full max-w-sm mx-4 bg-[#12151f] border border-[#2a2d3a] rounded-2xl shadow-2xl p-5" onClick={e => e.stopPropagation()}>
+                      <button onClick={() => setShowDescHelp(false)} className="absolute top-3.5 right-3.5 text-slate-500 hover:text-white transition-colors">
+                        <X className="w-4 h-4" />
+                      </button>
+                      <p className="text-sm font-bold text-white mb-3">How do descriptions work?</p>
+
+                      <div className="space-y-3 text-xs text-slate-400 leading-relaxed">
+                        <div className="flex gap-2.5">
+                          <span className="text-blue-400 font-bold shrink-0">Global</span>
+                          <p>Write one description — it will be applied to all products. The simplest option.</p>
+                        </div>
+
+                        <div className="flex gap-2.5">
+                          <span className="text-blue-400 font-bold shrink-0">By Category</span>
+                          <p>Set a different description for each category. The most specific match is used first.</p>
+                        </div>
+
+                        <div className="bg-black/30 rounded-lg p-3 space-y-1.5 text-[11px]">
+                          <p className="text-slate-300 font-medium mb-2">Example:</p>
+                          <p><span className="text-green-400">Belts</span> → "High quality belts"</p>
+                          <p><span className="text-green-400">Belts &gt; Leather</span> → "Premium leather belts"</p>
+                          <div className="border-t border-white/10 pt-1.5 mt-1.5 space-y-1">
+                            <p>Product in <span className="text-slate-300">Belts</span> → gets <span className="text-yellow-400">"High quality belts"</span></p>
+                            <p>Product in <span className="text-slate-300">Belts &gt; Leather</span> → gets <span className="text-yellow-400">"Premium leather belts"</span></p>
+                            <p>Product in <span className="text-slate-300">Belts &gt; Fabric</span> → gets <span className="text-yellow-400">"High quality belts"</span> <span className="text-slate-600">(inherited from parent)</span></p>
+                          </div>
+                        </div>
+
+                        <p className="text-slate-500 text-[11px]">
+                          If a category description is blank, it inherits from the parent category, then falls back to Global. HTML is supported in description fields.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="p-3.5 space-y-3">
+                  {descMode === 'global' ? (
+                    <>
+                      <p className="text-[11px] text-slate-500">One description applied to all products.</p>
+                      <textarea
+                        rows={4}
+                        placeholder="Enter product description (HTML allowed)..."
+                        value={globalDesc}
+                        onChange={e => setGlobalDesc(e.target.value)}
+                        className="w-full bg-[#0d0f17] border border-[#2a2d3a] rounded-lg px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 resize-none leading-relaxed"
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-[11px] text-slate-500 leading-relaxed">
+                        Set description per category. More specific overrides broader.
+                        <br />Leave blank to inherit from parent or global.
+                      </p>
+                      <div className="space-y-2.5 max-h-64 overflow-y-auto pr-1">
+                        {categoryPaths.map(path => {
+                          const depth = (path.match(/>/g) || []).length;
+                          return (
+                            <div key={path}>
+                              <label className="text-[11px] text-slate-400 mb-1 block font-mono">
+                                {'  '.repeat(depth)}{depth > 0 ? '↳ ' : ''}{path}
+                              </label>
+                              <textarea
+                                rows={2}
+                                placeholder={`Description for ${path.split(' > ').pop()}...`}
+                                value={categoryDescs[path] || ''}
+                                onChange={e => setCategoryDescs(prev => ({ ...prev, [path]: e.target.value }))}
+                                className="w-full bg-[#0d0f17] border border-[#2a2d3a] rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 resize-none"
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Category Names section — shown after scan */}
+            {session?.state === "preview" && hasProducts && categoryPaths.length > 0 && (
+              <div className="rounded-xl border border-[#2a2d3a] overflow-hidden">
+                <div className="px-3.5 py-2.5 bg-white/[0.02] border-b border-[#2a2d3a] flex items-center justify-between">
+                  <p className="text-xs font-semibold text-slate-300">Product Names <span className="text-slate-600 font-normal">(by category)</span></p>
+                  <button
+                    onClick={() => setShowNameHelp(true)}
+                    className="w-5 h-5 rounded-full border border-slate-600 text-slate-500 hover:text-white hover:border-slate-400 text-[11px] font-bold transition-colors flex items-center justify-center"
+                    title="How do category names work?"
+                  >
+                    ?
+                  </button>
+                </div>
+
+                {/* Name help popup */}
+                {showNameHelp && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowNameHelp(false)}>
+                    <div className="relative w-full max-w-sm mx-4 bg-[#12151f] border border-[#2a2d3a] rounded-2xl shadow-2xl p-5" onClick={e => e.stopPropagation()}>
+                      <button onClick={() => setShowNameHelp(false)} className="absolute top-3.5 right-3.5 text-slate-500 hover:text-white transition-colors">
+                        <X className="w-4 h-4" />
+                      </button>
+                      <p className="text-sm font-bold text-white mb-3">How do category names work?</p>
+                      <div className="space-y-3 text-xs text-slate-400 leading-relaxed">
+                        <p>By default, each product's name comes from its filename. Here you can override the name for all products in a specific category.</p>
+                        <div className="bg-black/30 rounded-lg p-3 space-y-1.5 text-[11px]">
+                          <p className="text-slate-300 font-medium mb-2">Example:</p>
+                          <p><span className="text-green-400">Belts</span> → "Leather Belt"</p>
+                          <p><span className="text-green-400">Belts &gt; Leather</span> → "Premium Leather Belt"</p>
+                          <div className="border-t border-white/10 pt-1.5 mt-1.5 space-y-1">
+                            <p>Product in <span className="text-slate-300">Belts</span> → named <span className="text-yellow-400">"Leather Belt"</span></p>
+                            <p>Product in <span className="text-slate-300">Belts &gt; Leather</span> → named <span className="text-yellow-400">"Premium Leather Belt"</span></p>
+                            <p>Product in <span className="text-slate-300">Belts &gt; Fabric</span> → named <span className="text-yellow-400">"Leather Belt"</span> <span className="text-slate-600">(inherited from parent)</span></p>
+                          </div>
+                        </div>
+                        <p className="text-slate-500 text-[11px]">Leave a field blank to use the filename-parsed name for that category. If blank and a parent category has a name set, the parent name is used.</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="p-3.5 space-y-2.5">
+                  <p className="text-[11px] text-slate-500 leading-relaxed">
+                    Override product names per category. Leave blank to use filename name.
+                  </p>
+                  <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
+                    {categoryPaths.map(path => {
+                      const depth = (path.match(/>/g) || []).length;
+                      return (
+                        <div key={path}>
+                          <label className="text-[11px] text-slate-400 mb-1 block font-mono">
+                            {'  '.repeat(depth)}{depth > 0 ? '↳ ' : ''}{path}
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="Filename name (default)"
+                            value={categoryNames[path] || ''}
+                            onChange={e => setCategoryNames(prev => ({ ...prev, [path]: e.target.value }))}
+                            className="w-full bg-[#0d0f17] border border-[#2a2d3a] rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-amber-500"
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             )}
 

@@ -310,9 +310,35 @@ def _run_upload(session_id: str, site: Any) -> None:
             except Exception as e:
                 raise Exception(_friendly_error(str(e), context="image"))
 
+            # Pick product name: most-specific category match → filename-parsed name
+            cat_names = session.get("category_names", {})
+            product_name = item["name"]
+            if cat_names:
+                parts = [p for p in [item.get("category"), item.get("subcategory"), item.get("subsubcategory")] if p]
+                for i in range(len(parts), 0, -1):
+                    key = " > ".join(parts[:i])
+                    if key in cat_names and cat_names[key]:
+                        product_name = cat_names[key]
+                        break
+
+            # Pick description: most-specific category match → global → empty
+            cat_descs = session.get("category_descriptions", {})
+            global_desc = session.get("global_description", "")
+            description = ""
+            if cat_descs:
+                parts = [p for p in [item.get("category"), item.get("subcategory"), item.get("subsubcategory")] if p]
+                for i in range(len(parts), 0, -1):
+                    key = " > ".join(parts[:i])
+                    if key in cat_descs and cat_descs[key]:
+                        description = cat_descs[key]
+                        break
+            if not description:
+                description = global_desc
+
             product_data: Dict[str, Any] = {
-                "name": item["name"],
+                "name": product_name,
                 "status": "publish",
+                "description": description,
                 "categories": [{"id": final_cat_id}] if final_cat_id is not None else [],
                 "images": [{"id": media_id}],
             }
@@ -354,6 +380,9 @@ class ScanRequest(BaseModel):
 
 class StartRequest(BaseModel):
     session_id: str
+    global_description: str = ""
+    category_descriptions: Dict[str, str] = {}
+    category_names: Dict[str, str] = {}
 
 
 # ── routes ────────────────────────────────────────────────────────────────────
@@ -409,6 +438,9 @@ def start_upload(req: StartRequest, background_tasks: BackgroundTasks):
 
     session["state"] = "running"
     session["cancelled"] = False
+    session["global_description"] = req.global_description.strip()
+    session["category_descriptions"] = {k.strip(): v.strip() for k, v in req.category_descriptions.items()}
+    session["category_names"] = {k.strip(): v.strip() for k, v in req.category_names.items()}
     background_tasks.add_task(_run_upload, req.session_id, site)
     return {"ok": True}
 
