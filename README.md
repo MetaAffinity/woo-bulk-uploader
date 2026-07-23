@@ -6,6 +6,30 @@ A standalone desktop app to bulk-upload product images to WooCommerce. Separate 
 
 ---
 
+## Changelog
+
+### v2.0
+- **Product Descriptions** — Global (one description for all products) or By Category (different description per category/subcategory). Inheritance: subcategory → parent category → global.
+- **Category Name Override** — Set a custom product name per category instead of always using the filename-parsed name. Inheritance works the same way: subcategory → parent → filename default. Leave blank to keep the filename name.
+- **Force Override SKU** — Checkbox in Auto-SKU section to replace existing SKUs on all products, not just products that have no SKU.
+- **CSV Export** — After scanning, export a WooCommerce-compatible CSV instead of uploading directly. Image URLs preserve the full folder path structure so files can be served from any server.
+
+### v1.0
+- Bulk upload product images from a local folder to WooCommerce
+- Filename parsing: SKU, product name, and price extracted automatically
+- Folder structure → categories (up to 3 levels deep)
+- Auto-SKU generation with prefix and start number
+- Skip already-uploaded: checks WooCommerce API for existing SKU before each upload
+- Retry Failed: re-attempt only failed products after upload
+- Resume interrupted upload: progress saved after every product, orange banner on next launch
+- Site mismatch warning: red alert if Settings site changed between sessions
+- WC ID clickable links: product ID opens WP Admin edit page directly
+- Settings page with Test Connection
+- About popup with developer info
+- Developer footer on all pages
+
+---
+
 ## Setup & Run
 
 ### First time only
@@ -47,6 +71,47 @@ Double-click `start.bat` — starts backend + frontend and opens the browser aut
 
 ### Auto-SKU Generation
 If images have no SKU in the filename, set a prefix (e.g. `FF`) and starting number. SKUs are auto-assigned: `FF001`, `FF002`, `FF003`...
+
+### Product Descriptions
+After scanning, a **Product Description** section appears in the left panel with two modes:
+
+**Global** — one description applied to all products.
+
+**By Category** — set a different description for each detected category/subcategory. Inheritance works automatically:
+- If subcategory has a description → use it
+- If not → use parent category description
+- If not → use Global description
+- If none set → product uploads with no description
+
+Example:
+```
+Belts              → "High quality belts"
+Belts > Leather    → "Premium leather belts"
+
+Product in Belts           → gets "High quality belts"
+Product in Belts > Leather → gets "Premium leather belts"
+Product in Belts > Fabric  → gets "High quality belts"  (inherits parent)
+```
+
+HTML is supported in description fields.
+
+### Category Name Override
+After scanning, a **Product Names** section appears in the left panel. Set a custom name for all products in any category or subcategory.
+
+- Leave a field blank → product keeps its filename-parsed name
+- If a subcategory has no name set → inherits from parent category
+- If parent has no name set → falls back to filename-parsed name
+
+Example:
+```
+Belts              → "Leather Belt"
+Belts > Leather    → "Premium Leather Belt"
+
+Product in Belts           → named "Leather Belt"
+Product in Belts > Leather → named "Premium Leather Belt"
+Product in Belts > Fabric  → named "Leather Belt"  (inherits parent)
+Product in Shoes           → named from filename    (no override set)
+```
 
 ### Skip Already-Uploaded
 Before each upload, the app checks WooCommerce via the API. If the SKU already exists, the product is skipped automatically — no duplicates created.

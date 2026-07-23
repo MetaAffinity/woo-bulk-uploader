@@ -23,11 +23,16 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ folder_path: folderPath, sku_prefix: skuPrefix, sku_start: skuStart ?? 1, force_sku: forceSku ?? false }),
     }),
-  bulkStart: (sessionId: string) =>
+  bulkStart: (sessionId: string, globalDescription?: string, categoryDescriptions?: Record<string, string>, categoryNames?: Record<string, string>) =>
     req('/bulk-upload/start', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ session_id: sessionId }),
+      body: JSON.stringify({
+        session_id: sessionId,
+        global_description: globalDescription ?? '',
+        category_descriptions: categoryDescriptions ?? {},
+        category_names: categoryNames ?? {},
+      }),
     }),
   bulkStatus: (sessionId: string) => req(`/bulk-upload/status/${sessionId}`),
   bulkCancel: (sessionId: string) =>
