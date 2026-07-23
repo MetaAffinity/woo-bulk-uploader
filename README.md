@@ -12,7 +12,7 @@ A standalone desktop app to bulk-upload product images to WooCommerce. Scan a lo
 - **Product Descriptions** — Global (one description for all products) or By Category (different description per category/subcategory). Inheritance: subcategory → parent category → global.
 - **Category Name Override** — Set a custom product name per category instead of always using the filename-parsed name. Inheritance works the same way: subcategory → parent → filename default. Leave blank to keep the filename name.
 - **Force Override SKU** — Checkbox in Auto-SKU section to replace existing SKUs on all products, not just products that have no SKU.
-- **CSV Export** — After scanning, export a WooCommerce-compatible CSV instead of uploading directly. Image URLs preserve the full folder path structure so files can be served from any server.
+- **CSV Export** — After scanning, export a WooCommerce-compatible CSV instead of uploading directly. Image URLs preserve the full folder path structure so files can be served from any server. Category name overrides and descriptions are applied to the CSV exactly as they would be during direct upload.
 
 ### v1.0
 - Bulk upload product images from a local folder to WooCommerce
@@ -112,6 +112,13 @@ Product in Belts > Leather → named "Premium Leather Belt"
 Product in Belts > Fabric  → named "Leather Belt"  (inherits parent)
 Product in Shoes           → named from filename    (no override set)
 ```
+
+### CSV Export
+Instead of uploading directly, click **Export as CSV** after scanning to download a WooCommerce-compatible CSV file.
+
+- All category name overrides and descriptions are applied in the CSV exactly as they would be during direct upload
+- Image URLs include the full relative folder path so images can be served from any server
+- Open in Excel, verify the data, then import via WooCommerce → Products → Import
 
 ### Skip Already-Uploaded
 Before each upload, the app checks WooCommerce via the API. If the SKU already exists, the product is skipped automatically — no duplicates created.
