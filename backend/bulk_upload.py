@@ -524,8 +524,15 @@ def cancel_session(session_id: str):
     return {"ok": True}
 
 
-@router.get("/export-csv/{session_id}")
-def export_csv(session_id: str, image_base_url: str = Query("")):
+class CsvExportRequest(BaseModel):
+    image_base_url: str = ""
+    category_names: Dict[str, str] = {}
+    category_descriptions: Dict[str, str] = {}
+    global_description: str = ""
+
+
+@router.post("/export-csv/{session_id}")
+def export_csv(session_id: str, req: CsvExportRequest):
     import csv, io, urllib.parse
     session = _sessions.get(session_id)
     if not session:
@@ -541,12 +548,32 @@ def export_csv(session_id: str, image_base_url: str = Query("")):
     writer = csv.DictWriter(output, fieldnames=headers)
     writer.writeheader()
 
-    base_url = image_base_url.rstrip("/") if image_base_url else ""
+    base_url = req.image_base_url.rstrip("/") if req.image_base_url else ""
     root_folder = Path(session.get("folder_path", ""))
 
     for p in session["products"]:
         cats = [c for c in [p.get("category"), p.get("subcategory"), p.get("subsubcategory")] if c]
         category_str = " > ".join(cats)
+
+        # Resolve product name: category override → filename name
+        product_name = p["name"]
+        if req.category_names:
+            for i in range(len(cats), 0, -1):
+                key = " > ".join(cats[:i])
+                if key in req.category_names and req.category_names[key]:
+                    product_name = req.category_names[key]
+                    break
+
+        # Resolve description: category → global
+        description = ""
+        if req.category_descriptions:
+            for i in range(len(cats), 0, -1):
+                key = " > ".join(cats[:i])
+                if key in req.category_descriptions and req.category_descriptions[key]:
+                    description = req.category_descriptions[key]
+                    break
+        if not description:
+            description = req.global_description
 
         if base_url:
             try:
@@ -561,12 +588,12 @@ def export_csv(session_id: str, image_base_url: str = Query("")):
         writer.writerow({
             "Type": "simple",
             "SKU": p.get("sku") or "",
-            "Name": p["name"],
+            "Name": product_name,
             "Published": 1,
             "Is featured?": 0,
             "Visibility in catalog": "visible",
             "Short description": "",
-            "Description": "",
+            "Description": description,
             "In stock?": 1,
             "Regular price": int(p["price"]) if p.get("price") else "",
             "Categories": category_str,

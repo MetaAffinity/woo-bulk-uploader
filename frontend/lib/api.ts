@@ -47,4 +47,30 @@ export const api = {
   bulkBrowseFolder: () => req('/bulk-upload/browse-folder'),
   bulkImageUrl: (sessionId: string, path: string) =>
     `${BASE}/bulk-upload/image?session_id=${sessionId}&path=${encodeURIComponent(path)}`,
+  bulkExportCsv: async (
+    sessionId: string,
+    imageBaseUrl: string,
+    categoryNames: Record<string, string>,
+    categoryDescriptions: Record<string, string>,
+    globalDescription: string,
+  ) => {
+    const r = await fetch(`${BASE}/bulk-upload/export-csv/${sessionId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        image_base_url: imageBaseUrl,
+        category_names: categoryNames,
+        category_descriptions: categoryDescriptions,
+        global_description: globalDescription,
+      }),
+    })
+    if (!r.ok) throw new Error(`HTTP ${r.status}`)
+    const blob = await r.blob()
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'woocommerce_products.csv'
+    a.click()
+    URL.revokeObjectURL(url)
+  },
 }

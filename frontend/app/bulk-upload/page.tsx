@@ -656,14 +656,21 @@ export default function BulkUploadPage() {
                         className="w-full bg-[#12151f] border border-[#2a2d3a] rounded-lg px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 font-mono"
                       />
                     </div>
-                    <a
-                      href={`http://localhost:8000/bulk-upload/export-csv/${sessionId}?image_base_url=${encodeURIComponent(imgBaseUrl)}`}
-                      download="woocommerce_products.csv"
-                      className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                    <button
+                      onClick={async () => {
+                        try {
+                          const catDesc = descMode === 'category' ? categoryDescs : {};
+                          const globDesc = descMode === 'global' ? globalDesc : '';
+                          await api.bulkExportCsv(sessionId!, imgBaseUrl, categoryNames, catDesc, globDesc);
+                        } catch (e: any) {
+                          setError(e.message || 'CSV export failed');
+                        }
+                      }}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
                     >
                       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                       Download CSV
-                    </a>
+                    </button>
                   </div>
                 )}
               </div>
