@@ -1,6 +1,9 @@
 # credentials — never commit
 config.json
 
+# local backup folder
+backup app/
+
 # runtime sessions
 sessions/
 
