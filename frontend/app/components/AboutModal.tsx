@@ -38,7 +38,7 @@ export default function AboutModal() {
               </div>
               <div>
                 <p className="text-sm font-bold text-white">WooCommerce Bulk Uploader</p>
-                <p className="text-xs text-slate-500">v1.0.0</p>
+                <p className="text-xs text-slate-500">v2.0.0</p>
               </div>
             </div>
 
