@@ -1,0 +1,29 @@
+# credentials — never commit
+config.json
+
+# runtime sessions
+sessions/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+
+# Generated outputs
+woocommerce_products.csv
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
