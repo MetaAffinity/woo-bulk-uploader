@@ -214,6 +214,19 @@ export default function SettingsPage() {
 
                 {testResult && (
                   <>
+                    {/* Overall result */}
+                    {testResult.ok ? (
+                      <div className="flex items-center gap-2.5 p-2.5 rounded-lg text-xs border bg-green-500/10 border-green-500/25 text-green-400">
+                        <CheckCircle2 className="w-4 h-4 shrink-0" />
+                        <p className="font-semibold">All checks passed — ready to upload!</p>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2.5 p-2.5 rounded-lg text-xs border bg-red-500/8 border-red-500/20 text-red-400">
+                        <XCircle className="w-4 h-4 shrink-0" />
+                        <p className="font-semibold">Some checks failed — fix the issues below.</p>
+                      </div>
+                    )}
+
                     {/* WooCommerce API */}
                     <div className={`flex items-start gap-2.5 p-2.5 rounded-lg text-xs border ${
                       testResult.wc_ok
