@@ -10,6 +10,7 @@ A standalone desktop app to bulk-upload product images to WooCommerce. Scan a lo
 
 ### v2.0
 - **Product Descriptions** — Global (one description for all products) or By Category (different description per category/subcategory). Inheritance: subcategory → parent category → global.
+- **Credential Validation on Save** — Saving Settings now auto-validates both WooCommerce API keys and WordPress Application Password separately, with specific error messages if either fails.
 - **Category Name Override** — Set a custom product name per category instead of always using the filename-parsed name. Inheritance works the same way: subcategory → parent → filename default. Leave blank to keep the filename name.
 - **Force Override SKU** — Checkbox in Auto-SKU section to replace existing SKUs on all products, not just products that have no SKU.
 - **CSV Export** — After scanning, export a WooCommerce-compatible CSV instead of uploading directly. Image URLs preserve the full folder path structure so files can be served from any server. Category name overrides and descriptions are applied to the CSV exactly as they would be during direct upload.
@@ -153,7 +154,12 @@ Credentials are stored in `config.json` at the project root.
 }
 ```
 
-Use **Test Connection** to verify credentials before uploading.
+Click **Save Settings** — credentials are saved and automatically validated. Two checks run:
+
+- **WooCommerce API** — verifies your Consumer Key and Secret have Read/Write access
+- **WordPress Application Password** — verifies your WP username and app password can authenticate for image uploads. If wrong, an exact error is shown explaining what to fix (incorrect password, disabled on localhost, etc.)
+
+You can also click **Test Connection** anytime to re-run these checks without saving.
 
 ---
 
