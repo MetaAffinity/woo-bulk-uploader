@@ -802,14 +802,52 @@ export default function BulkUploadPage() {
         {/* RIGHT PANEL */}
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
           {!hasResults && !scanning && (
-            <div className="h-full flex flex-col items-center justify-center text-center text-slate-600 gap-3">
-              <FolderInput className="w-12 h-12 opacity-30" />
-              <p className="text-sm font-medium text-slate-500">
-                Enter a folder path and click Scan
-              </p>
-              <p className="text-xs">
-                Results and upload progress will appear here
-              </p>
+            <div className="h-full flex flex-col items-center justify-center px-6 py-12 gap-10">
+              <div className="text-center">
+                <p className="text-base font-semibold text-slate-300">Select a folder and click Scan to begin</p>
+                <p className="text-xs text-slate-600 mt-1">All results and upload progress will appear here</p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 w-full max-w-2xl">
+                {/* Feature 1 */}
+                <div className="flex items-start gap-4 p-4 rounded-2xl border border-[#2a2d3a] bg-[#12151f]">
+                  <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
+                    <Upload className="w-5 h-5 text-blue-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white">Direct Upload to WooCommerce</p>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                      Scan a folder of images — product name, SKU, and price are parsed from filenames automatically. Categories are built from folder structure (up to 3 levels). Products are created in WooCommerce in one click.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Feature 2 */}
+                <div className="flex items-start gap-4 p-4 rounded-2xl border border-[#2a2d3a] bg-[#12151f]">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                    <svg className="w-5 h-5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white">CSV Export</p>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                      Instead of uploading directly, export a WooCommerce-compatible CSV. Open in Excel to review or edit, then import via WooCommerce. Image URLs preserve the full folder path for any server.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Feature 3 */}
+                <div className="flex items-start gap-4 p-4 rounded-2xl border border-[#2a2d3a] bg-[#12151f]">
+                  <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center shrink-0">
+                    <svg className="w-5 h-5 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white">Category-Based Names &amp; Descriptions</p>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                      Set custom product names and descriptions per category or subcategory — no need to rename files. Inheritance built in: subcategory → parent category → global → filename default.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
