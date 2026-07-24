@@ -802,49 +802,68 @@ export default function BulkUploadPage() {
         {/* RIGHT PANEL */}
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
           {!hasResults && !scanning && (
-            <div className="h-full flex flex-col items-center justify-center px-6 py-12 gap-10">
+            <div className="h-full flex flex-col items-center justify-center px-8 gap-10">
+              {/* Hero */}
               <div className="text-center">
-                <p className="text-base font-semibold text-slate-300">Select a folder and click Scan to begin</p>
-                <p className="text-xs text-slate-600 mt-1">All results and upload progress will appear here</p>
+                <div className="w-14 h-14 rounded-2xl bg-blue-600/10 border border-blue-500/15 flex items-center justify-center mx-auto mb-4">
+                  <Upload className="w-6 h-6 text-blue-400" />
+                </div>
+                <p className="text-lg font-bold text-white tracking-tight">WooCommerce Bulk Uploader</p>
+                <p className="text-sm text-slate-500 mt-1.5">
+                  Select a folder on the left and click <span className="text-slate-400 font-medium">Scan Folder</span> to get started
+                </p>
               </div>
 
-              <div className="grid grid-cols-1 gap-4 w-full max-w-2xl">
-                {/* Feature 1 */}
-                <div className="flex items-start gap-4 p-4 rounded-2xl border border-[#2a2d3a] bg-[#12151f]">
-                  <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
-                    <Upload className="w-5 h-5 text-blue-400" />
+              {/* Feature cards — 3 column */}
+              <div className="grid grid-cols-3 gap-4 w-full max-w-3xl">
+                <div className="flex flex-col gap-4 p-5 rounded-2xl border border-[#2a2d3a] bg-[#12151f] hover:border-blue-500/30 transition-colors">
+                  <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                    <Upload className="w-4 h-4 text-blue-400" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-white">Direct Upload to WooCommerce</p>
-                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                      Scan a folder of images — product name, SKU, and price are parsed from filenames automatically. Categories are built from folder structure (up to 3 levels). Products are created in WooCommerce in one click.
+                    <p className="text-sm font-semibold text-white">Direct Upload</p>
+                    <p className="text-[11px] text-slate-500 mt-1.5 leading-relaxed">
+                      Names, SKUs, prices parsed from filenames. Folder structure becomes categories. Products live in WooCommerce in one click.
                     </p>
+                  </div>
+                  <div className="flex flex-wrap gap-1 mt-auto">
+                    {['Auto-SKU', 'Categories', 'Skip duplicates', 'Resume'].map(t => (
+                      <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/15">{t}</span>
+                    ))}
                   </div>
                 </div>
 
-                {/* Feature 2 */}
-                <div className="flex items-start gap-4 p-4 rounded-2xl border border-[#2a2d3a] bg-[#12151f]">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
-                    <svg className="w-5 h-5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                <div className="flex flex-col gap-4 p-5 rounded-2xl border border-[#2a2d3a] bg-[#12151f] hover:border-emerald-500/30 transition-colors">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                    <svg className="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-white">CSV Export</p>
-                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                      Instead of uploading directly, export a WooCommerce-compatible CSV. Open in Excel to review or edit, then import via WooCommerce. Image URLs preserve the full folder path for any server.
+                    <p className="text-[11px] text-slate-500 mt-1.5 leading-relaxed">
+                      Export a WooCommerce-ready CSV instead of uploading directly. Review in Excel, then import. Images, categories, prices — all included.
                     </p>
+                  </div>
+                  <div className="flex flex-wrap gap-1 mt-auto">
+                    {['Excel ready', 'Image paths', 'WC import'].map(t => (
+                      <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/15">{t}</span>
+                    ))}
                   </div>
                 </div>
 
-                {/* Feature 3 */}
-                <div className="flex items-start gap-4 p-4 rounded-2xl border border-[#2a2d3a] bg-[#12151f]">
-                  <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center shrink-0">
-                    <svg className="w-5 h-5 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                <div className="flex flex-col gap-4 p-5 rounded-2xl border border-[#2a2d3a] bg-[#12151f] hover:border-purple-500/30 transition-colors">
+                  <div className="w-9 h-9 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
+                    <svg className="w-4 h-4 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-white">Category-Based Names &amp; Descriptions</p>
-                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                      Set custom product names and descriptions per category or subcategory — no need to rename files. Inheritance built in: subcategory → parent category → global → filename default.
+                    <p className="text-sm font-semibold text-white">Names &amp; Descriptions</p>
+                    <p className="text-[11px] text-slate-500 mt-1.5 leading-relaxed">
+                      Set product names and descriptions per category — no file renaming needed. Subcategory inherits from parent if left blank.
                     </p>
+                  </div>
+                  <div className="flex flex-wrap gap-1 mt-auto">
+                    {['Per category', 'Inheritance', 'HTML support'].map(t => (
+                      <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/15">{t}</span>
+                    ))}
                   </div>
                 </div>
               </div>
