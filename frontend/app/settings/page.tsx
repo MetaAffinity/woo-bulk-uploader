@@ -24,7 +24,9 @@ export default function SettingsPage() {
   const [saving, setSaving]     = useState(false)
   const [testing, setTesting]   = useState(false)
   const [saved, setSaved]       = useState(false)
-  const [testResult, setTestResult] = useState<{ ok: boolean; error?: string } | null>(null)
+  const [testResult, setTestResult] = useState<{
+    ok: boolean; wc_ok?: boolean; wp_ok?: boolean; wc_error?: string; wp_error?: string
+  } | null>(null)
   const [showSecret, setShowSecret] = useState(false)
   const [showAppPass, setShowAppPass] = useState(false)
 
@@ -43,9 +45,20 @@ export default function SettingsPage() {
   async function handleSave() {
     setSaving(true)
     setSaved(false)
+    setTestResult(null)
     try {
       await api.saveSettings(form)
       setSaved(true)
+      // Auto-validate after save
+      setTesting(true)
+      try {
+        const r: any = await api.testConnection()
+        setTestResult(r)
+      } catch (e: any) {
+        setTestResult({ ok: false, wc_error: e.message })
+      } finally {
+        setTesting(false)
+      }
     } catch (e: any) {
       alert('Save failed: ' + e.message)
     } finally {
@@ -187,16 +200,58 @@ export default function SettingsPage() {
           </div>
 
           {/* Test result */}
-          {testResult && (
-            <div className={`flex items-start gap-2 p-3 rounded-xl border text-sm ${
-              testResult.ok
-                ? 'bg-green-500/10 border-green-500/20 text-green-400'
-                : 'bg-red-500/10 border-red-500/20 text-red-400'
-            }`}>
-              {testResult.ok
-                ? <><CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" /> Connection successful — WooCommerce API is working.</>
-                : <><XCircle className="w-4 h-4 shrink-0 mt-0.5" /> {testResult.error || 'Connection failed'}</>
-              }
+          {(testResult || testing) && (
+            <div className="rounded-xl border border-[#2a2d3a] overflow-hidden">
+              <div className="px-4 py-2.5 bg-white/[0.02] border-b border-[#2a2d3a]">
+                <p className="text-xs font-semibold text-slate-300">Connection Check</p>
+              </div>
+              <div className="p-3.5 space-y-2.5">
+                {testing && !testResult && (
+                  <div className="flex items-center gap-2 text-slate-400 text-xs">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" /> Checking credentials...
+                  </div>
+                )}
+
+                {testResult && (
+                  <>
+                    {/* WooCommerce API */}
+                    <div className={`flex items-start gap-2.5 p-2.5 rounded-lg text-xs border ${
+                      testResult.wc_ok
+                        ? 'bg-green-500/8 border-green-500/20 text-green-400'
+                        : 'bg-red-500/8 border-red-500/20 text-red-400'
+                    }`}>
+                      {testResult.wc_ok
+                        ? <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                        : <XCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                      }
+                      <div>
+                        <p className="font-medium">WooCommerce API</p>
+                        {!testResult.wc_ok && testResult.wc_error && (
+                          <p className="mt-0.5 text-[11px] opacity-80">{testResult.wc_error}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* WordPress App Password */}
+                    <div className={`flex items-start gap-2.5 p-2.5 rounded-lg text-xs border ${
+                      testResult.wp_ok
+                        ? 'bg-green-500/8 border-green-500/20 text-green-400'
+                        : 'bg-red-500/8 border-red-500/20 text-red-400'
+                    }`}>
+                      {testResult.wp_ok
+                        ? <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                        : <XCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                      }
+                      <div>
+                        <p className="font-medium">WordPress Application Password</p>
+                        {!testResult.wp_ok && testResult.wp_error && (
+                          <p className="mt-0.5 text-[11px] opacity-80 whitespace-pre-line">{testResult.wp_error}</p>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           )}
 
